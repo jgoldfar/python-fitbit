@@ -6,11 +6,10 @@ import threading
 import traceback
 import webbrowser
 
-from urllib.parse import urlparse
+import urllib.parse as urlparse
 from base64 import b64encode
 from fitbit.api import Fitbit
 from oauthlib.oauth2.rfc6749.errors import MismatchingStateError, MissingTokenError
-import urllib.parse as urlparse
 import argparse
 
 class OAuth2Server:
@@ -42,7 +41,7 @@ class OAuth2Server:
         threading.Timer(1, webbrowser.open, args=(url,)).start()
 
         # Same with redirect_uri hostname and port.
-        urlparams = urlparse(self.redirect_uri)
+        urlparams = urlparse.urlparse(self.redirect_uri)
         cherrypy.config.update({'server.socket_host': urlparams.hostname,
                                 'server.socket_port': urlparams.port})
 
@@ -110,16 +109,16 @@ if __name__ == '__main__':
     # Arguments parsing
     parser = argparse.ArgumentParser("Client ID and Secret are mandatory arguments")
     parser.add_argument("-i", "--id", required=True, help="Client id", metavar='<client-id>')
-    parser.add_argument("-s", "--secret", required=True, help="Client secret", 
+    parser.add_argument("-s", "--secret", required=True, help="Client secret",
         metavar='<client-secret>')
-    parser.add_argument("-c", "--console", default=False, 
+    parser.add_argument("-c", "--console", default=False,
         help="Authenticate only using console (for headless systems)", action="store_true")
     args = parser.parse_args()
 
     server = OAuth2Server(args.id, args.secret)
     if args.console:
         server.headless_authorize()
-    else:   
+    else:
         server.browser_authorize()
 
     profile = server.fitbit.user_profile_get()
